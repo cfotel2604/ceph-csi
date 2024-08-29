@@ -262,7 +262,16 @@ func buildCreateVolumeResponse(
 	vID *store.VolumeIdentifier,
 ) *csi.CreateVolumeResponse {
 	volumeContext := util.GetVolumeContext(req.GetParameters())
-	volumeContext["subvolumeName"] = vID.FsSubvolName
+
+	// volumeContext["subvolumeName"] = vID.FsSubvolName
+    // Sử dụng tên PVC từ metadata nếu có, hoặc sử dụng FsSubvolName như mặc định
+    pvcName := req.GetName()
+    if pvcName != "" {
+        volumeContext["subvolumeName"] = pvcName
+    } else {
+        volumeContext["subvolumeName"] = vID.FsSubvolName
+    }
+
 	volumeContext["subvolumePath"] = volOptions.RootPath
 	volume := &csi.Volume{
 		VolumeId:      vID.VolumeID,
